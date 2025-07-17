@@ -1,0 +1,75 @@
+#Requires AutoHotkey v2.0
+Persistent
+
+global hiddenHwnds := []
+global myGui
+
+ShowStartupGui()
+SetTimer(CloseStartupGui, -1000)
+
+^+b::HideAllWindows()
+^+c::RestoreAllWindows()
+^+a::FakeWork()
+
+ShowStartupGui() {
+    global myGui
+    myGui := Gui("+AlwaysOnTop -SysMenu +ToolWindow")
+    myGui.Add("Picture", "", "galacticbaseballer.png")
+    myGui.SetFont("s18 bold cBlack", "游ゴシック")
+    myGui.Add("Text", "Center BackgroundTrans w400 h50", "ルールは破るためにある")
+    myGui.Show("AutoSize Center")
+    try {
+        SoundPlay("sound.wav", "wait")
+    }
+    catch {
+        MsgBox("音声の再生に失敗しました。")
+    }
+}
+
+CloseStartupGui(*) {
+    global myGui
+    if IsSet(myGui)
+        myGui.Destroy()
+}
+
+HideAllWindows() {
+    global hiddenHwnds
+    hiddenHwnds := []
+    hwndList := WinGetList()
+    for hwnd in hwndList {
+        class := WinGetClass(hwnd)
+        if class != "Progman" && class != "WorkerW" && class != "Shell_TrayWnd" {
+            try {
+                WinHide("ahk_id " hwnd)
+                hiddenHwnds.Push(hwnd)
+            }
+            catch {
+            }
+        }
+    }
+}
+
+RestoreAllWindows() {
+    global hiddenHwnds
+    for hwnd in hiddenHwnds {
+        try WinShow("ahk_id " hwnd)
+    }
+    hiddenHwnds := []
+    try {
+        SoundPlay("restore.wav", "wait")
+    }
+    catch {
+        MsgBox("音声の再生に失失败しました。")
+    }
+}
+
+FakeWork() {
+    hwndList := WinGetList()
+    for hwnd in hwndList {
+        class := WinGetClass(hwnd)
+        if class != "Progman" && class != "WorkerW" && class != "Shell_TrayWnd" {
+            try WinHide("ahk_id " hwnd)
+        }
+    }
+    Run("https://tlms.tsc.u-tokai.ac.jp/")
+}
